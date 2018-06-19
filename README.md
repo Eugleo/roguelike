@@ -22,7 +22,7 @@ help, and a sense of community. If you're even only remotely interested in
 making your own roguelike, be sure to visit that subreddit!
 
 
-[1][https://en.wikipedia.org/wiki/Roguelike]
-[2][https://racket-lang.org]
-[3][http://rogueliketutorials.com/libtcod/1]
-[4][https://www.reddit.com/r/roguelikedev/comments/8s5x5n/roguelikedev_does_the_complete_roguelike_tutorial/]
+[1]: https://en.wikipedia.org/wiki/Roguelike
+[2]: https://racket-lang.org
+[3]: http://rogueliketutorials.com/libtcod/1
+[4]: https://www.reddit.com/r/roguelikedev/comments/8s5x5n/roguelikedev_does_the_complete_roguelike_tutorial/
