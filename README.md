@@ -2,7 +2,7 @@
 
 In my new project (so new in fact it doesn't even have a proper name yet) I try to
 build a [roguelike][1] in [Racket][2]. Racket is a modern and cool lisp dialect and
-I chose it, because I want to get involved in functional programming, but at the same 
+I chose it because I want to get involved in functional programming, but at the same 
 time don't want to struggle with Haskell.
 
 ## The plan
