@@ -1,6 +1,7 @@
 #lang racket
 
-(require 2htdp/universe 2htdp/image "world.rkt" "point.rkt" "entities.rkt")
+(require 2htdp/universe 2htdp/image)
+(require "world.rkt" "point.rkt" "entities.rkt" "world-map.rkt")
 (provide (all-defined-out))
 
 (struct screen (world canvas))
@@ -13,7 +14,7 @@
   (define tile-size (map-canvas-tile-size canvas))
   (define world (screen-world screen))
   (for/fold ([canvas (map-canvas-canvas canvas)])
-            ([entity (in-list (send world get-entities))])
+            ([entity (in-list (world-entities world))])
     (define x (send entity get-x))
     (define y (send entity get-y))
     (define character (send entity get-character))
@@ -35,18 +36,22 @@
     [("q") (stop-with screen)]
     [else screen]))
 
+; int int screen -> screen
+; if the world permits, move the player as specified
 (define (try-move dx dy screen)
-  (define player (send (screen-world screen) get-player))
+  (define player (world-player (screen-world screen)))
   (define x (send player get-x))
   (define y (send player get-y))
-  (define world-map (send (screen-world screen) get-world-map))
+  (define w-map (world-world-map (screen-world screen)))
   (define can-walk 
-    (and (< -1 (+ x dx) (send world-map get-width))
-         (< -1 (+ y dy) (send world-map get-height))
-         (send world-map is-tile-walk-through? (+ x dx) (+ y dy))))
+    (and (< -1 (+ x dx) (world-map-width w-map))
+         (< -1 (+ y dy) (world-map-height w-map))
+         (is-tile-walk-through? (+ x dx) (+ y dy) w-map)))
   (cond [can-walk (send player move! dx dy)])
   screen)
 
+; character int int color color image int -> image
+; draw a given character on the canvas
 (define (draw-on-canvas char x y fg bg canvas tile-size)
   (define char-rect  
     (overlay 
@@ -54,21 +59,26 @@
       (rectangle tile-size tile-size "solid" bg)))
   (place-image/align char-rect (* x tile-size) (* y tile-size) 'left 'top canvas))
 
-(define (make-screen world tile-size)
-  (define canvas (make-map-canvas (send world get-world-map) tile-size))
+; world int -> screen
+; construct a screen from a given world (canvas gets generated)
+(define (make-screen width height tile-size)
+  (define world (make-world (/ width tile-size) (/ height tile-size)))
+  (define canvas (make-map-canvas (world-world-map world) tile-size))
   (screen world canvas))
 
-(define (make-map-canvas world-map tile-size)
-  (define tiled-width (send world-map get-width))
-  (define tiled-height (send world-map get-height))
+; world-map int -> map-canvas
+; construct a canvas from a world map
+(define (make-map-canvas w-map tile-size)
+  (define tiled-width (world-map-width w-map))
+  (define tiled-height (world-map-height w-map))
   (define starting-canvas 
     (rectangle (* tiled-width tile-size) (* tiled-height tile-size) "solid" "black"))
   (define canvas 
     (for*/fold ([canvas starting-canvas])
                ([x (in-range tiled-width)]
                 [y (in-range tiled-height)])
-      (define character (if (send world-map is-tile-walk-through? x y) "."  "§"))
-      (define color (if (send world-map is-tile-walk-through? x y) "brown"  "black"))
+      (define character (if (is-tile-walk-through? x y w-map) "."  "§"))
+      (define color (if (is-tile-walk-through? x y w-map) "brown"  "black"))
       (draw-on-canvas character x y "white" color canvas tile-size)))
   (map-canvas tiled-width tiled-height tile-size canvas))
 
