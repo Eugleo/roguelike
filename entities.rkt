@@ -1,12 +1,14 @@
 #lang racket
 
-(provide (all-defined-out))
+;; The main superclass for all non-terrain things in the game 
 
-(define movable
+(provide entity%)
+
+(define movable<%>
   (interface () move!))
 
 (define entity%
-  (class* object% (movable) 
+  (class* object% (movable<%>) 
     (init-field x y character color)
 
     (define/public (get-x) x)

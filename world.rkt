@@ -2,8 +2,9 @@
 
 ;; The world and associated functions
 
-(require "entities.rkt" "point.rkt" "world-map.rkt")
-(provide (all-defined-out))
+(provide world-player world-map world-world-map world-entities make-world)
+
+(require "entities.rkt" "world-map.rkt")
 
 ;; The world is the datastructure holding the entities of the game, as well as the whole environment
 (struct world (world-map player entities))

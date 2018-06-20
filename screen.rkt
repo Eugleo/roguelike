@@ -5,7 +5,7 @@
 (provide make-screen)
 
 (require lux lux/chaos/gui/key racket/draw)
-(require "world.rkt" "point.rkt" "entities.rkt" "world-map.rkt")
+(require "world.rkt" "entities.rkt" "world-map.rkt")
 
 ;; world int -> screen
 ;; construct a screen from a given world (canvas gets generated)
