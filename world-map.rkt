@@ -6,6 +6,12 @@
 
 (struct world-map (width height tiles))
 
+;; Generate (well, now it's hardcoded, but...) the whole map 
+(define (generate-world-map width height)
+  (define w-map (make-world-map width height))
+  (set-wall! '((6 3) (7 3) (8 3) (8 4) (8 5)) w-map)
+  w-map)
+
 (define (make-world-map width height)
   (define tiles 
     (for/vector #:length width ([xi (in-range width)])
@@ -14,7 +20,7 @@
   (world-map width height tiles))
 
 (define (set-tile! tile x y tiles)
-  (vector-set!(vector-ref tiles x) y tile))
+  (vector-set! (vector-ref tiles x) y tile))
 
 (define (get-tile x y w-map)
   (define tiles (world-map-tiles w-map))
