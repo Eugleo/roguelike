@@ -16,6 +16,6 @@
 
 ;; The game loop
 (call-with-chaos
-  (make-gui #:width w #:height (+ toolbar-height h)) ; Construct a GUI window
-  (lambda () (fiat-lux (make-screen w h tile-size)))) ; Generate the inital state and run the loop
+ (make-gui #:width w #:height (+ toolbar-height h)) ; Construct a GUI window
+ (lambda () (fiat-lux (make-roguelike w h tile-size)))) ; Generate the inital state and run the loop
 

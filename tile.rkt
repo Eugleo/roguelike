@@ -1,6 +1,6 @@
 #lang racket
 
-;; The basic building block of all maps
+;; The basic building block of all terrains
 
 (provide tile%)
 
@@ -8,6 +8,7 @@
 (define tile%
   (class object%
     (init-field see-through walk-through)
+    
     (define/public (is-walk-through?) walk-through)
     
     (super-new)))

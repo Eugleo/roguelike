@@ -2,26 +2,27 @@
 
 ;; The main game loop and the rendering code
 
-(provide make-screen)
+(provide make-roguelike)
 
-(require lux lux/chaos/gui/key racket/draw)
-(require "world.rkt" "entities.rkt" "world-map.rkt")
+(require lux lux/chaos/gui/key racket/draw "world.rkt" "entities.rkt" "region.rkt" "terrain.rkt")
 
-;; world int -> screen
-;; construct a screen from a given world (canvas gets generated)
-(define (make-screen width height tile-size)
+;; int int int -> roguelike
+;; Construct a roguelike from a given world (canvas gets generated)
+(define (make-roguelike width height tile-size)
   (define world (make-world (/ width tile-size) (/ height tile-size)))
-  (screen world tile-size))
+  (roguelike world tile-size))
 
 ;; The main game "loop structure"
-;; Tile size is an int describing the scale between the world size and the screen size
-(struct screen (world tile-size)
+;; Tile size is an int describing the scale between the world size and the roguelike size
+(struct roguelike (world tile-size)
   #:methods gen:word
   [(define (word-fps word) 0.0)
 
+   ;; roguelike string -> string
+   ;; Set the title of the created window
    (define (word-label word framerate) "Roguelike")
    
-   ;; screen event -> screen
+   ;; roguelike event -> roguelike
    ;; Return a new state after handling an event
    ;; event = keystroke, mouse movement, window position and/or size change
    (define (word-event word event)
@@ -38,16 +39,18 @@
           [(numpad3 #\n) (try-move 1 1 word)]
           [(#\q) #f]
           [else word])]
-       [(eq? 'close event) #f]
+       [(eq? 'close word) #f]
        [else word]))
    
-   ;; screen -> (int int drawing-context -> void)
+   ;; roguelike -> (int int drawing-context -> void)
    ;; Given current game state, perform the necessary drawing of the game scene
-   (define (word-output screen)
+   (define (word-output word)
      (define font (make-font #:size 22 #:face "Press Start 2P" #:family 'default #:weight 'bold))
-     (define world (screen-world screen))
-     (define tile-size (screen-tile-size screen))
-     (define player (world-player (screen-world screen)))
+     (define world (roguelike-world word))
+     (define tile-size (roguelike-tile-size word))
+     (define player (world-player world))
+     (define region (world-current-region world))
+     (define terrain (region-terrain region))
     
      ;; The expected return type of word-output is a function with three arguments
      (lambda (width height dc)
@@ -58,11 +61,11 @@
        ;; Render walls and obstacles
        (for* ([x (in-range (/ width tile-size))]
               [y (in-range (/ height tile-size))])
-         (cond [(not (is-tile-walk-through? x y (world-world-map world)))
+         (cond [(not (terrain-is-place-walk-through? x y terrain))
                 (draw-centered-text dc "#" x y tile-size)]))
 
        ;; Render NPCs and animals
-       (for ([entity (in-list (world-entities world))])
+       (for ([entity (in-list (region-entities region))])
          (define char (send entity get-character))
          (define color (send entity get-color))
          (define x (send entity get-x))
@@ -72,26 +75,27 @@
        ;; Render the player
        (draw-centered-text dc "@" (send player get-x) (send player get-y) tile-size)))])
 
+;; drawing-context string int int int (optional color) -> void
 ;; Center text in its given position 
 (define (draw-centered-text dc text x y tile-size #:color [color "white"])
   (send dc set-text-foreground color)
   (define-values (w h d a) (send dc get-text-extent text))
   (send dc draw-text text (+ (/ (- tile-size h) 2) (* tile-size x))
-                          (+ (/ (- tile-size h d) 2) (* tile-size y))))
+        (+ (/ (- tile-size h d) 2) (* tile-size y))))
 
-;; int int screen -> screen
+;; int int roguelike -> roguelike
 ;; If the world boundaries permit, move the player as specified
-(define (try-move dx dy screen)
-  (define player (world-player (screen-world screen)))
+(define (try-move dx dy roguelike)
+  (define player (world-player (roguelike-world roguelike)))
   (define x (send player get-x))
   (define y (send player get-y))
-  (define w-map (world-world-map (screen-world screen)))
+  (define terrain (region-terrain (world-current-region (roguelike-world roguelike))))
   (define can-walk 
-    (and (< -1 (+ x dx) (world-map-width w-map))
-         (< -1 (+ y dy) (world-map-height w-map))
-         (is-tile-walk-through? (+ x dx) (+ y dy) w-map)))
+    (and (< -1 (+ x dx) (terrain-width terrain))
+         (< -1 (+ y dy) (terrain-height terrain))
+         (terrain-is-place-walk-through? (+ x dx) (+ y dy) terrain)))
   (cond [can-walk (send player move! dx dy)])
-  screen)
+  roguelike)
 
 
 

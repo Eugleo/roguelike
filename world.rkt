@@ -2,20 +2,21 @@
 
 ;; The world and associated functions
 
-(provide world-player world-map world-world-map world-entities make-world)
+(provide world-player make-world world-current-region)
 
-(require "entities.rkt" "world-map.rkt")
+(require "entities.rkt" "region.rkt")
 
-;; The world is the datastructure holding the entities of the game, as well as the whole environment
-(struct world (world-map player entities))
+;; Datastructure holding the entities of the game, as well as the whole environment
+(struct world (regions player))
 
-;; Generate (well, now it's hardcoded, but...) the entities of the world
-(define (generate-entities)
-  (define npc (new entity% [x 10] [y 6] [character "&"] [color "mediumgoldenrod"]))
-  (list npc))
-
+;; int int -> world
+;; "Generate" a world, given the dimensions of its regions
 (define (make-world width height)
-  (define world-map (generate-world-map width height)) ; Getting ready for generated content
-  (define entities (generate-entities)) ; Getting ready for generated content
-  (world world-map (new entity% [x 0] [y 0] [character "@"] [color "white"]) entities))
+  (define region (make-region width height)) ; Getting ready for generated content
+  (define player (new person% [x 0] [y 0] [character "@"] [color "white"]))
+  (world (list region) player))
 
+;; world -> region
+;; Return the active (shown) region of the world
+(define (world-current-region world)
+  (first (world-regions world)))
