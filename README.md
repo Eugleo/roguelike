@@ -9,7 +9,7 @@ I'm following the [Python 3 libtcod tutorial][3], but without libtcod
 and without Python (yeah). I'll try to stick to the original where possible,
 if not with the architecture, then at least with the general idea.
 
-There's also an accompanying blog series about this now, you can [see it here][6]
+There's also an accompanying blog series about this now, you can [see it here][6].
 
 ## The motivation
 
