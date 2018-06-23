@@ -9,7 +9,7 @@ I'm following the [Python 3 libtcod tutorial][3], but without libtcod
 and without Python (yeah). I'll try to stick to the original where possible,
 if not with the architecture, then at least with the general idea.
 
-I'll also do a blog series about this in the future. 
+There's also an accompanying blog series about this now, you can [see it here][6]
 
 ## The motivation
 
@@ -37,3 +37,4 @@ If you have Racket installed on your computer, running the game should be pretty
 [3]: http://rogueliketutorials.com/libtcod/1
 [4]: https://www.reddit.com/r/roguelikedev/comments/8s5x5n/roguelikedev_does_the_complete_roguelike_tutorial/
 [5]: https://www.dafont.com/press-start-2p.font
+[6]: https://hicsuntleones.netlify.com/tags/roguelike/
