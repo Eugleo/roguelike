@@ -2,7 +2,7 @@
 
 ;; The main file of my roguelike
 
-(require lux lux/chaos/gui "screen.rkt")
+(require lux lux/chaos/gui "roguelike.rkt")
 
 ;; The GUI dimensions
 (define w 800)

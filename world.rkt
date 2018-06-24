@@ -4,7 +4,7 @@
 
 (provide world-player make-world world-current-region)
 
-(require "entities.rkt" "region.rkt")
+(require "entities.rkt" "region.rkt" "terrain.rkt")
 
 ;; Datastructure holding the entities of the game, as well as the whole environment
 (struct world (regions player))
@@ -13,7 +13,8 @@
 ;; "Generate" a world, given the dimensions of its regions
 (define (make-world width height)
   (define region (make-region width height)) ; Getting ready for generated content
-  (define player (new person% [x 0] [y 0] [character "@"] [color "white"]))
+  (define-values (x y) (random-walkable-tile-coords (region-terrain region)))
+  (define player (new person% [x x] [y y] [character "@"] [color "white"]))
   (world (list region) player))
 
 ;; world -> region

@@ -39,7 +39,7 @@
           [(numpad3 #\n) (try-move 1 1 word)]
           [(#\q) #f]
           [else word])]
-       [(eq? 'close word) #f]
+       [(eq? 'close event) #f]
        [else word]))
    
    ;; roguelike -> (int int drawing-context -> void)
@@ -57,12 +57,15 @@
        (send dc set-background "black")
        (send dc clear)
        (send dc set-font font)
+       (send dc set-text-mode 'solid)
+       (send dc set-text-background "black")
 
        ;; Render walls and obstacles
        (for* ([x (in-range (/ width tile-size))]
               [y (in-range (/ height tile-size))])
          (cond [(not (terrain-is-place-walk-through? x y terrain))
-                (draw-centered-text dc "#" x y tile-size)]))
+                (draw-centered-text dc "#" x y tile-size)]
+               [else (draw-centered-text dc "." x y tile-size)]))
 
        ;; Render NPCs and animals
        (for ([entity (in-list (region-entities region))])
