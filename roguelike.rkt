@@ -3,7 +3,6 @@
 ;; The main game loop and the rendering code
 
 (provide make-roguelike)
-(define wall (read-bitmap	"tiles.png"))
 
 (define counter 1)
 
@@ -19,14 +18,14 @@
   (define-values (x y) (values (send player get-x) (send player get-y)))
   (define tiles (terrain-tiles (region-terrain (world-current-region world))))
 
-(cast-light x y 1 0 1 0 1 1 0 tiles)
-(cast-light x y 1 0 1 1 0 0 1 tiles)
-(cast-light x y 1 0 1 0 -1 1 0 tiles)
-(cast-light x y 1 0 1 -1 0 0 1 tiles)
-(cast-light x y 1 0 1 -1 0 0 -1 tiles)
-(cast-light x y 1 0 1 0 -1 -1 0 tiles)
-(cast-light x y 1 0 1 0 1 -1 0 tiles)
-(cast-light x y 1 0 1 1 0 0 -1 tiles)
+  (cast-light x y 1 0 1 0 1 1 0 tiles)
+  (cast-light x y 1 0 1 1 0 0 1 tiles)
+  (cast-light x y 1 0 1 0 -1 1 0 tiles)
+  (cast-light x y 1 0 1 -1 0 0 1 tiles)
+  (cast-light x y 1 0 1 -1 0 0 -1 tiles)
+  (cast-light x y 1 0 1 0 -1 -1 0 tiles)
+  (cast-light x y 1 0 1 0 1 -1 0 tiles)
+  (cast-light x y 1 0 1 1 0 0 -1 tiles)
 
   (roguelike world canvas tile-size))
 
@@ -75,7 +74,7 @@
      (lambda (width height dc)
        (send dc set-background "black")
        (send dc clear)
-(send canvas set-background "black")
+       (send canvas set-background "black")
        (send canvas clear)
 
        ;; Render walls and obstacles
@@ -83,29 +82,31 @@
              [x (in-naturals)])
          (for ([tile (in-vector column)]
                [y (in-naturals)]) 
-          (cond
-             [(equal? 5 (get-field light tile))
-                (define-values (bm-x bm-y) (get-bitmap-for-tile tile))
-                (draw-bitmap-on-tile wall bm-x bm-y x y tile-size canvas)])))
+           (define visible (equal? 5 (get-field light tile)))
+           (define seen (send tile seen?))
+           (cond
+             [(or visible seen)
+              (send tile set-seen! #t)
+              (draw-bitmap-on-tile (get-bitmap-for-tile tile visible) x y tile-size canvas)])))
        (send dc draw-bitmap (send canvas get-bitmap) 0 0)  
 
        ;; Render NPCs and animals
        (for ([entity (in-list (region-entities region))])
          (define x (send entity get-x))
          (define y (send entity get-y))
-         (define-values (bm-x bm-y) (get-bitmap-for-entity entity))
-         (cond [(equal? 5 (get-field light (get-tile x y tiles))) (draw-bitmap-on-tile wall bm-x bm-y x y tile-size dc)])
-         )
+         (define bitmap (get-bitmap-for-entity entity))
+
+         (cond [(equal? 5 (get-field light (get-tile x y tiles))) (draw-bitmap-on-tile bitmap x y tile-size dc)]))
        
        ;; Render the player
-        (define-values (p-bm-x p-bm-y) (get-bitmap-for-entity player))
-        (draw-bitmap-on-tile wall p-bm-x p-bm-y (send player get-x) (send player get-y) tile-size dc)
+       (define p-bitmap (get-bitmap-for-entity player))
+       (draw-bitmap-on-tile p-bitmap (send player get-x) (send player get-y) tile-size dc)
 
        ))])
 
 
-(define (draw-bitmap-on-tile bm bm-x bm-y x y tile-size canvas)
-  (send canvas draw-bitmap-section bm (* x tile-size) (* y tile-size) (* tile-size bm-x) (* tile-size bm-y) tile-size tile-size))
+(define (draw-bitmap-on-tile bm x y tile-size canvas)
+  (send canvas draw-bitmap bm (* x tile-size) (* y tile-size)))
 
 
 ;; int int roguelike -> roguelike
@@ -121,23 +122,23 @@
          (< -1 (+ y dy) (terrain-height terrain))
          (terrain-is-place-walk-through? (+ x dx) (+ y dy) terrain)))
   (cond [can-walk 
-(for ([column (in-vector (terrain-tiles terrain))]
-             [x (in-naturals)])
-         (for ([tile (in-vector column)]
-               [y (in-naturals)])            
-         (set-field! light tile 0)))
-(send player move! dx dy)
-(define x (send player get-x))
-  (define y (send player get-y))
-          (cast-light x y 1 0 1 0 1 1 0 (terrain-tiles terrain))
-(cast-light x y 1 0 1 1 0 0 1 (terrain-tiles terrain))
-(cast-light x y 1 0 1 0 -1 1 0 (terrain-tiles terrain))
-(cast-light x y 1 0 1 -1 0 0 1 (terrain-tiles terrain))
-(cast-light x y 1 0 1 -1 0 0 -1 (terrain-tiles terrain))
-(cast-light x y 1 0 1 0 -1 -1 0 (terrain-tiles terrain))
-(cast-light x y 1 0 1 0 1 -1 0 (terrain-tiles terrain))
-(cast-light x y 1 0 1 1 0 0 -1 (terrain-tiles terrain))
-          ])
+         (for ([column (in-vector (terrain-tiles terrain))]
+               [x (in-naturals)])
+           (for ([tile (in-vector column)]
+                 [y (in-naturals)])            
+             (set-field! light tile 0)))
+         (send player move! dx dy)
+         (define x (send player get-x))
+         (define y (send player get-y))
+         (cast-light x y 1 0 1 0 1 1 0 (terrain-tiles terrain))
+         (cast-light x y 1 0 1 1 0 0 1 (terrain-tiles terrain))
+         (cast-light x y 1 0 1 0 -1 1 0 (terrain-tiles terrain))
+         (cast-light x y 1 0 1 -1 0 0 1 (terrain-tiles terrain))
+         (cast-light x y 1 0 1 -1 0 0 -1 (terrain-tiles terrain))
+         (cast-light x y 1 0 1 0 -1 -1 0 (terrain-tiles terrain))
+         (cast-light x y 1 0 1 0 1 -1 0 (terrain-tiles terrain))
+         (cast-light x y 1 0 1 1 0 0 -1 (terrain-tiles terrain))
+         ])
   roguelike)
 
 

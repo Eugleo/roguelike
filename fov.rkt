@@ -43,7 +43,7 @@
               (cast-light x y strt left-slope (add1 distance) xx xy yx yy tiles)
               (helper2 #t (add1 deltaX) deltaY right-slope strt distance)]
              [else
-               (helper2 #f (add1 deltaX) deltaY right-slope strt distance)]))]))
+              (helper2 #f (add1 deltaX) deltaY right-slope strt distance)]))]))
 
   (cond
     [(< start end) void]

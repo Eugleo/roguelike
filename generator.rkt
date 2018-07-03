@@ -16,7 +16,7 @@
 
     (define/public (generate-tiles width height)
 
-    (define rooms (generate-rooms 3 #:size-bounds (list 7 12) #:position-bounds (list width height)))
+      (define rooms (generate-rooms 3 #:size-bounds (list 7 12) #:position-bounds (list width height)))
       (tiles-add-doors (tiles-add-rooms (make-empty-tiles width height) rooms) rooms))
 
     (define (tiles-add-doors tiles rooms)
@@ -102,7 +102,7 @@
           (vector-ref (vector-ref tiles x) y)
           #f))
 
-   (define (tiles-set x y tile tiles)
+    (define (tiles-set x y tile tiles)
       (define tiles-copy (vector-copy tiles))
       (vector-set! (vector-ref tiles-copy x) y tile)
       tiles-copy)
