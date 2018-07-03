@@ -19,16 +19,17 @@
 ;; Generate (well, now it's hardcoded, but...) the entities of the world
 (define (generate-entities terrain)
   (define-values (x y) (random-walkable-tile-coords terrain))
-  (define npc (new person% [x x] [y y] [character "&"] [color "mediumgoldenrod"]))
+  (define npc (new person% [x x] [y y]))
   (list npc))
 
 ;; terrain -> int int
 ;; Return a random tile which is located in a room on the given terrain
 (define (random-walkable-tile-coords terrain)
-  (define rooms (terrain-rooms terrain))
-  (define room (random-from-list rooms))
-  (values (random (rect-x room) (rect-x-bound room))
-          (random (rect-y room) (rect-y-bound room))))
+  (define x (random (terrain-width terrain)))
+  (define y (random (terrain-height terrain)))
+  (if (terrain-is-place-walk-through? x y terrain) 
+      (values x y) 
+      (random-walkable-tile-coords terrain)))
 
 ;; (listof val) -> val
 ;; Return a random value from the list

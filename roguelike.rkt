@@ -1,90 +1,112 @@
-#lang racket
+#lang racket/gui
 
 ;; The main game loop and the rendering code
 
 (provide make-roguelike)
+(define wall (read-bitmap	"tiles.png"))
 
-(require lux lux/chaos/gui/key racket/draw "world.rkt" "entities.rkt" "region.rkt" "terrain.rkt")
+(define counter 1)
+
+(require lux lux/chaos/gui/key "world.rkt" "entities.rkt" "region.rkt" "terrain.rkt" "tile.rkt" "fov.rkt" "image-db.rkt")
 
 ;; int int int -> roguelike
 ;; Construct a roguelike from a given world (canvas gets generated)
-(define (make-roguelike width height tile-size)
-  (define world (make-world (/ width tile-size) (/ height tile-size)))
-  (roguelike world tile-size))
+(define (make-roguelike column-no row-no tile-size)
+  (define canvas (new bitmap-dc% [bitmap (make-bitmap (* column-no tile-size) (* row-no tile-size))]))
+  (define world (make-world column-no row-no))
+
+  (define player (world-player world))
+  (define-values (x y) (values (send player get-x) (send player get-y)))
+  (define tiles (terrain-tiles (region-terrain (world-current-region world))))
+
+(cast-light x y 1 0 1 0 1 1 0 tiles)
+(cast-light x y 1 0 1 1 0 0 1 tiles)
+(cast-light x y 1 0 1 0 -1 1 0 tiles)
+(cast-light x y 1 0 1 -1 0 0 1 tiles)
+(cast-light x y 1 0 1 -1 0 0 -1 tiles)
+(cast-light x y 1 0 1 0 -1 -1 0 tiles)
+(cast-light x y 1 0 1 0 1 -1 0 tiles)
+(cast-light x y 1 0 1 1 0 0 -1 tiles)
+
+  (roguelike world canvas tile-size))
 
 ;; The main game "loop structure"
 ;; Tile size is an int describing the scale between the world size and the roguelike size
-(struct roguelike (world tile-size)
+(struct roguelike (world canvas tile-size)
   #:methods gen:word
-  [(define (word-fps word) 0.0)
+  [(define (word-fps state) 0.0)
 
    ;; roguelike string -> string
    ;; Set the title of the created window
-   (define (word-label word framerate) "Roguelike")
+   (define (word-label state framerate) "Roguelike")
    
    ;; roguelike event -> roguelike
    ;; Return a new state after handling an event
    ;; event = keystroke, mouse movement, window position and/or size change
-   (define (word-event word event)
+   (define (word-event state event)
      (cond
        [(key-event? event)
         (case (send event get-key-code)
-          [(numpad4 #\h left) (try-move -1 0 word)]
-          [(numpad6 #\l right) (try-move 1 0 word)]
-          [(numpad2 #\j down) (try-move 0 1 word)]
-          [(numpad8 #\k up) (try-move 0 -1 word)]
-          [(numpad7 #\y #\z) (try-move -1 -1 word)]
-          [(numpad9 #\u) (try-move 1 -1 word)]
-          [(numpad1 #\b) (try-move -1 1 word)]
-          [(numpad3 #\n) (try-move 1 1 word)]
+          [(numpad4 #\h left) (try-move -1 0 state)]
+          [(numpad6 #\l right) (try-move 1 0 state)]
+          [(numpad2 #\j down) (try-move 0 1 state)]
+          [(numpad8 #\k up) (try-move 0 -1 state)]
+          [(numpad7 #\y #\z) (try-move -1 -1 state)]
+          [(numpad9 #\u) (try-move 1 -1 state)]
+          [(numpad1 #\b) (try-move -1 1 state)]
+          [(numpad3 #\n) (try-move 1 1 state)]
           [(#\q) #f]
-          [else word])]
+          [else state])]
        [(eq? 'close event) #f]
-       [else word]))
+       [else state]))
    
    ;; roguelike -> (int int drawing-context -> void)
    ;; Given current game state, perform the necessary drawing of the game scene
-   (define (word-output word)
-     (define font (make-font #:size 22 #:face "Press Start 2P" #:family 'default #:weight 'bold))
-     (define world (roguelike-world word))
-     (define tile-size (roguelike-tile-size word))
+   (define (word-output state)
+     (define world (roguelike-world state))
+     (define canvas (roguelike-canvas state))
+     (define tile-size (roguelike-tile-size state))
      (define player (world-player world))
      (define region (world-current-region world))
      (define terrain (region-terrain region))
+     (define tiles (terrain-tiles terrain))
     
-     ;; The expected return type of word-output is a function with three arguments
+     ;; The expected return type of word-output is a function expecting three arguments
      (lambda (width height dc)
        (send dc set-background "black")
        (send dc clear)
-       (send dc set-font font)
-       (send dc set-text-mode 'solid)
-       (send dc set-text-background "black")
+(send canvas set-background "black")
+       (send canvas clear)
 
        ;; Render walls and obstacles
-       (for* ([x (in-range (/ width tile-size))]
-              [y (in-range (/ height tile-size))])
-         (cond [(not (terrain-is-place-walk-through? x y terrain))
-                (draw-centered-text dc "#" x y tile-size)]
-               [else (draw-centered-text dc "." x y tile-size)]))
+       (for ([column (in-vector tiles)]
+             [x (in-naturals)])
+         (for ([tile (in-vector column)]
+               [y (in-naturals)]) 
+          (cond
+             [(equal? 5 (get-field light tile))
+                (define-values (bm-x bm-y) (get-bitmap-for-tile tile))
+                (draw-bitmap-on-tile wall bm-x bm-y x y tile-size canvas)])))
+       (send dc draw-bitmap (send canvas get-bitmap) 0 0)  
 
        ;; Render NPCs and animals
        (for ([entity (in-list (region-entities region))])
-         (define char (send entity get-character))
-         (define color (send entity get-color))
          (define x (send entity get-x))
          (define y (send entity get-y))
-         (draw-centered-text dc char x y tile-size #:color color))
+         (define-values (bm-x bm-y) (get-bitmap-for-entity entity))
+         (cond [(equal? 5 (get-field light (get-tile x y tiles))) (draw-bitmap-on-tile wall bm-x bm-y x y tile-size dc)])
+         )
        
        ;; Render the player
-       (draw-centered-text dc "@" (send player get-x) (send player get-y) tile-size)))])
+        (define-values (p-bm-x p-bm-y) (get-bitmap-for-entity player))
+        (draw-bitmap-on-tile wall p-bm-x p-bm-y (send player get-x) (send player get-y) tile-size dc)
 
-;; drawing-context string int int int (optional color) -> void
-;; Center text in its given position 
-(define (draw-centered-text dc text x y tile-size #:color [color "white"])
-  (send dc set-text-foreground color)
-  (define-values (w h d a) (send dc get-text-extent text))
-  (send dc draw-text text (+ (/ (- tile-size h) 2) (* tile-size x))
-        (+ (/ (- tile-size h d) 2) (* tile-size y))))
+       ))])
+
+
+(define (draw-bitmap-on-tile bm bm-x bm-y x y tile-size canvas)
+  (send canvas draw-bitmap-section bm (* x tile-size) (* y tile-size) (* tile-size bm-x) (* tile-size bm-y) tile-size tile-size))
+
 
 ;; int int roguelike -> roguelike
 ;; If the world boundaries permit, move the player as specified
@@ -93,12 +115,31 @@
   (define x (send player get-x))
   (define y (send player get-y))
   (define terrain (region-terrain (world-current-region (roguelike-world roguelike))))
+
   (define can-walk 
     (and (< -1 (+ x dx) (terrain-width terrain))
          (< -1 (+ y dy) (terrain-height terrain))
          (terrain-is-place-walk-through? (+ x dx) (+ y dy) terrain)))
-  (cond [can-walk (send player move! dx dy)])
+  (cond [can-walk 
+(for ([column (in-vector (terrain-tiles terrain))]
+             [x (in-naturals)])
+         (for ([tile (in-vector column)]
+               [y (in-naturals)])            
+         (set-field! light tile 0)))
+(send player move! dx dy)
+(define x (send player get-x))
+  (define y (send player get-y))
+          (cast-light x y 1 0 1 0 1 1 0 (terrain-tiles terrain))
+(cast-light x y 1 0 1 1 0 0 1 (terrain-tiles terrain))
+(cast-light x y 1 0 1 0 -1 1 0 (terrain-tiles terrain))
+(cast-light x y 1 0 1 -1 0 0 1 (terrain-tiles terrain))
+(cast-light x y 1 0 1 -1 0 0 -1 (terrain-tiles terrain))
+(cast-light x y 1 0 1 0 -1 -1 0 (terrain-tiles terrain))
+(cast-light x y 1 0 1 0 1 -1 0 (terrain-tiles terrain))
+(cast-light x y 1 0 1 1 0 0 -1 (terrain-tiles terrain))
+          ])
   roguelike)
 
 
-
+(define (one-from opt1 opt2)
+  (if (eq? (random 2) 1) opt1 opt2))
