@@ -13,11 +13,9 @@
 (define (make-roguelike column-no row-no tile-size)
   (define canvas (new bitmap-dc% [bitmap (make-bitmap (* column-no tile-size) (* row-no tile-size))]))
   (define world (make-world column-no row-no))
-
   (define player (world-player world))
   (define-values (x y) (values (send player get-x) (send player get-y)))
-  (define tiles (terrain-tiles (region-terrain (world-current-region world))))
-  (cast-light x y tiles)
+  (define tiles (cast-light x y (terrain-tiles (region-terrain (world-current-region world)))))
   (roguelike world canvas tile-size))
 
 ;; The main game "loop structure"
