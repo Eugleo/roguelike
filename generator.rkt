@@ -14,15 +14,9 @@
     (init-field width height)
 
     (define/public (generate-tiles width height)
-
       (define rooms 
         (generate-rooms 3 #:size-bounds (list 7 12) #:position-bounds (list width height)))
-      (tiles-add-doors (tiles-add-rooms (make-empty-tiles width height) rooms) rooms)
-      (for/fold ([tiles (make-empty-tiles width height)])
-                ([x (in-list (list 7 8 9 7 8 9 7 8 9 12 15   8 9))]
-                 [y (in-list (list 7 7 7 8 8 8 9 9 9 9  9   10 10))])
-        (tiles-add-wall tiles x y)))
-
+      (tiles-add-doors (tiles-add-rooms (make-empty-tiles width height) rooms) rooms))
 
     (define (tiles-add-wall tiles x y)
       (tiles-set x y (new wall%) tiles))
