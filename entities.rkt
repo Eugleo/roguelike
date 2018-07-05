@@ -1,6 +1,6 @@
 #lang racket
 
-;; The classes for all non-terrain things in the game 
+;; The classes for all non-terrain things in the game
 
 (provide person% player%)
 
@@ -10,13 +10,13 @@
 
 ;; The main superclass of all entities
 (define entity%
-  (class* object% ()
+  (class object%
     (init-field x y)
 
     (define/public (get-x) x)
     (define/public (get-y) y)
-    
-    (super-new)))
+
+   (super-new)))
 
 ;; A movable entity
 (define person%
@@ -26,10 +26,10 @@
     (define/public (move! dx dy)
       (set! x (+ x dx))
       (set! y (+ y dy)))
-    
+
     (super-new)))
 
-
+;; A movable entity
 (define player%
   (class* entity% (movable<%>)
     (inherit-field x y)
@@ -37,6 +37,5 @@
     (define/public (move! dx dy)
       (set! x (+ x dx))
       (set! y (+ y dy)))
-    
-    (super-new)))
 
+    (super-new)))

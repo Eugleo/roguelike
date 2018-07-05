@@ -4,7 +4,7 @@
 
 (require "tile.rkt" "entities.rkt")
 
-(define tiles-bitmap (read-bitmap	"tiles.png"))
+(define tiles-bitmap (read-bitmap  "tiles.png"))
 
 (define (col-eq? col1 col2)
   (and
@@ -16,42 +16,42 @@
 (define (get-bitmap-for-tile tile visible)
       (define bitmap-hash (if visible tile-bitmaps-hash shadow-tile-bitmaps-hash))
       (cond
-      [(is-a? tile wall%)
-       (case (get-field orientation tile)
-         [(horizontal) (hash-ref bitmap-hash 'wall-horizontal)]
-         [(vertical) (hash-ref bitmap-hash 'wall-vertical)]
-         [(up-right) (hash-ref bitmap-hash 'wall-top-right)]
-         [(up-left) (hash-ref bitmap-hash 'wall-top-left)]
-         [(down-right) (hash-ref bitmap-hash 'wall-bottom-right)]
-         [(down-left) (hash-ref bitmap-hash 'wall-bottom-left)]
-         [(cross) (hash-ref bitmap-hash 'wall-cross)]
-         [(t-up) (hash-ref bitmap-hash 'wall-t-top)]
-         [(t-right) (hash-ref bitmap-hash 'wall-t-right)]
-         [(t-down) (hash-ref bitmap-hash 'wall-t-bottom)]
-         [(t-left) (hash-ref bitmap-hash 'wall-t-left)])]
-      [(is-a? tile wooden-floor%) (hash-ref bitmap-hash 'wooden-floor)]
-      [(is-a? tile grass%) (hash-ref bitmap-hash 'grass)]
-      [(is-a? tile door%) (hash-ref bitmap-hash 'door-open)]))
+       [(is-a? tile wall%)
+        (case (get-field orientation tile)
+          [(horizontal) (hash-ref bitmap-hash 'wall-horizontal)]
+          [(vertical) (hash-ref bitmap-hash 'wall-vertical)]
+          [(up-right) (hash-ref bitmap-hash 'wall-top-right)]
+          [(up-left) (hash-ref bitmap-hash 'wall-top-left)]
+          [(down-right) (hash-ref bitmap-hash 'wall-bottom-right)]
+          [(down-left) (hash-ref bitmap-hash 'wall-bottom-left)]
+          [(cross) (hash-ref bitmap-hash 'wall-cross)]
+          [(t-up) (hash-ref bitmap-hash 'wall-t-top)]
+          [(t-right) (hash-ref bitmap-hash 'wall-t-right)]
+          [(t-down) (hash-ref bitmap-hash 'wall-t-bottom)]
+          [(t-left) (hash-ref bitmap-hash 'wall-t-left)])]
+       [(is-a? tile wooden-floor%) (hash-ref bitmap-hash 'wooden-floor)]
+       [(is-a? tile grass%) (hash-ref bitmap-hash 'grass)]
+       [(is-a? tile door%) (hash-ref bitmap-hash 'door-open)]))
 
 
 (define (get-shadow-bitmap-for-tile tile)
       (cond
-      [(is-a? tile wall%)
-       (case (get-field orientation tile)
-         [(horizontal) (hash-ref tile-bitmaps-hash 'wall-horizontal)]
-         [(vertical) (hash-ref tile-bitmaps-hash 'wall-vertical)]
-         [(up-right) (hash-ref tile-bitmaps-hash 'wall-top-right)]
-         [(up-left) (hash-ref tile-bitmaps-hash 'wall-top-left)]
-         [(down-right) (hash-ref tile-bitmaps-hash 'wall-bottom-right)]
-         [(down-left) (hash-ref tile-bitmaps-hash 'wall-bottom-left)]
-         [(cross) (hash-ref tile-bitmaps-hash 'wall-cross)]
-         [(t-up) (hash-ref tile-bitmaps-hash 'wall-t-top)]
-         [(t-right) (hash-ref tile-bitmaps-hash 'wall-t-right)]
-         [(t-down) (hash-ref tile-bitmaps-hash 'wall-t-bottom)]
-         [(t-left) (hash-ref tile-bitmaps-hash 'wall-t-left)])]
-      [(is-a? tile wooden-floor%) (hash-ref tile-bitmaps-hash 'wooden-floor)]
-      [(is-a? tile grass%) (hash-ref tile-bitmaps-hash 'grass)]
-      [(is-a? tile door%) (hash-ref tile-bitmaps-hash 'door-open)]))
+       [(is-a? tile wall%)
+        (case (get-field orientation tile)
+          [(horizontal) (hash-ref tile-bitmaps-hash 'wall-horizontal)]
+          [(vertical) (hash-ref tile-bitmaps-hash 'wall-vertical)]
+          [(up-right) (hash-ref tile-bitmaps-hash 'wall-top-right)]
+          [(up-left) (hash-ref tile-bitmaps-hash 'wall-top-left)]
+          [(down-right) (hash-ref tile-bitmaps-hash 'wall-bottom-right)]
+          [(down-left) (hash-ref tile-bitmaps-hash 'wall-bottom-left)]
+          [(cross) (hash-ref tile-bitmaps-hash 'wall-cross)]
+          [(t-up) (hash-ref tile-bitmaps-hash 'wall-t-top)]
+          [(t-right) (hash-ref tile-bitmaps-hash 'wall-t-right)]
+          [(t-down) (hash-ref tile-bitmaps-hash 'wall-t-bottom)]
+          [(t-left) (hash-ref tile-bitmaps-hash 'wall-t-left)])]
+       [(is-a? tile wooden-floor%) (hash-ref tile-bitmaps-hash 'wooden-floor)]
+       [(is-a? tile grass%) (hash-ref tile-bitmaps-hash 'grass)]
+       [(is-a? tile door%) (hash-ref tile-bitmaps-hash 'door-open)]))
 
 
 (define tile-bm-coords-hash
@@ -74,19 +74,19 @@
 (define tile-colors-hash
   (make-immutable-hash
     '([wooden-floor . "peru"]
-      [grass . "DarkKhaki"]
+      [grass . "limegreen"]
       [door-open . "LightSlateGray"]
       [wall-top-right . "LightSlateGray"]
-     [wall-bottom-right . "LightSlateGray"]
-     [wall-top-left . "LightSlateGray"]
-     [wall-bottom-left . "LightSlateGray"]
-     [wall-t-top . "LightSlateGray"]
-     [wall-t-bottom . "LightSlateGray"]
-     [wall-t-left . "LightSlateGray"]
-     [wall-t-right . "LightSlateGray"]
-     [wall-cross . "LightSlateGray"]
-     [wall-horizontal . "LightSlateGray"]
-     [wall-vertical . "LightSlateGray"])))
+      [wall-bottom-right . "LightSlateGray"]
+      [wall-top-left . "LightSlateGray"]
+      [wall-bottom-left . "LightSlateGray"]
+      [wall-t-top . "LightSlateGray"]
+      [wall-t-bottom . "LightSlateGray"]
+      [wall-t-left . "LightSlateGray"]
+      [wall-t-right . "LightSlateGray"]
+      [wall-cross . "LightSlateGray"]
+      [wall-horizontal . "LightSlateGray"]
+      [wall-vertical . "LightSlateGray"])))
 
 
 (define (get-bitmap-for-entity entity)
@@ -122,11 +122,10 @@
 (define shadow-tile-bitmaps-hash
     (for/hash ([key (in-list (hash-keys tile-bm-coords-hash))])
       (define coords (hash-ref tile-bm-coords-hash key))
-      (values key (make-colored-tile-bm (first coords) (second coords) "Dim Gray"))))
+      (values key (make-colored-tile-bm (first coords) (second coords) (if (equal? key 'grass) "DarkGreen" "Dim Gray")))))
 
 (define entity-bitmaps-hash
     (for/hash ([key (in-list (hash-keys entity-bm-coords-hash))])
       (define coords (hash-ref entity-bm-coords-hash key))
       (define color "white")
       (values key (make-colored-tile-bm (first coords) (second coords) color))))
-

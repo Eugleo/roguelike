@@ -17,16 +17,7 @@
   (define player (world-player world))
   (define-values (x y) (values (send player get-x) (send player get-y)))
   (define tiles (terrain-tiles (region-terrain (world-current-region world))))
-
-  (cast-light x y 1 0 1 0 1 1 0 tiles)
-  (cast-light x y 1 0 1 1 0 0 1 tiles)
-  (cast-light x y 1 0 1 0 -1 1 0 tiles)
-  (cast-light x y 1 0 1 -1 0 0 1 tiles)
-  (cast-light x y 1 0 1 -1 0 0 -1 tiles)
-  (cast-light x y 1 0 1 0 -1 -1 0 tiles)
-  (cast-light x y 1 0 1 0 1 -1 0 tiles)
-  (cast-light x y 1 0 1 1 0 0 -1 tiles)
-
+  (cast-light x y tiles)
   (roguelike world canvas tile-size))
 
 ;; The main game "loop structure"
@@ -100,9 +91,9 @@
        
        ;; Render the player
        (define p-bitmap (get-bitmap-for-entity player))
-       (draw-bitmap-on-tile p-bitmap (send player get-x) (send player get-y) tile-size dc)
+       (draw-bitmap-on-tile p-bitmap (send player get-x) (send player get-y) tile-size dc)))])
 
-       ))])
+       
 
 
 (define (draw-bitmap-on-tile bm x y tile-size canvas)
@@ -113,14 +104,14 @@
 ;; If the world boundaries permit, move the player as specified
 (define (try-move dx dy roguelike)
   (define player (world-player (roguelike-world roguelike)))
-  (define x (send player get-x))
-  (define y (send player get-y))
+  (define new-x (+ dx (send player get-x)))
+  (define new-y (+ dy (send player get-y)))
   (define terrain (region-terrain (world-current-region (roguelike-world roguelike))))
 
   (define can-walk 
-    (and (< -1 (+ x dx) (terrain-width terrain))
-         (< -1 (+ y dy) (terrain-height terrain))
-         (terrain-is-place-walk-through? (+ x dx) (+ y dy) terrain)))
+    (and (< -1 new-x (terrain-width terrain))
+         (< -1 new-y (terrain-height terrain))
+         (terrain-is-place-walk-through? new-x new-y terrain)))
   (cond [can-walk 
          (for ([column (in-vector (terrain-tiles terrain))]
                [x (in-naturals)])
@@ -128,17 +119,8 @@
                  [y (in-naturals)])            
              (set-field! light tile 0)))
          (send player move! dx dy)
-         (define x (send player get-x))
-         (define y (send player get-y))
-         (cast-light x y 1 0 1 0 1 1 0 (terrain-tiles terrain))
-         (cast-light x y 1 0 1 1 0 0 1 (terrain-tiles terrain))
-         (cast-light x y 1 0 1 0 -1 1 0 (terrain-tiles terrain))
-         (cast-light x y 1 0 1 -1 0 0 1 (terrain-tiles terrain))
-         (cast-light x y 1 0 1 -1 0 0 -1 (terrain-tiles terrain))
-         (cast-light x y 1 0 1 0 -1 -1 0 (terrain-tiles terrain))
-         (cast-light x y 1 0 1 0 1 -1 0 (terrain-tiles terrain))
-         (cast-light x y 1 0 1 1 0 0 -1 (terrain-tiles terrain))
-         ])
+         (cast-light new-x new-y (terrain-tiles terrain))])
+         
   roguelike)
 
 

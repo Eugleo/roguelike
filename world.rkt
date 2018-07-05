@@ -14,7 +14,7 @@
 (define (make-world width height)
   (define region (make-region width height)) ; Getting ready for generated content
   (define-values (x y) (random-walkable-tile-coords (region-terrain region)))
-  (define player (new player% [x x] [y y]))
+  (define player (new player% [x 8] [y 13]))
   (world (list region) player))
 
 ;; world -> region
