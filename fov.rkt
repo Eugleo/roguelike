@@ -32,8 +32,8 @@
 (define (make-scanner x y xx xy yx yy cells)
   (define width (tiles-width cells))
   (define height (tiles-height cells))
-  (define (set-cell-to-lit x y cells)
-    (set-field! light (get-tile x y cells) 5) 
+  (define (set-cell-to-lit loc-x loc-y cells)
+    (set-field! light (get-tile loc-x loc-y cells) 5) 
     cells)
 
   ;; Run a scan on the given cell-index line-index coords
@@ -50,6 +50,8 @@
     ;; slope-e is the slope of the cell which is closer to the end-slope
     (define slope-s (/ (+ cell-index 0.5) (- line-index 0.5)))
     (define slope-e (/ (- cell-index 0.5) (+ line-index 0.5)))
+
+    (define slope-c (/ cell-index line-index))
 
     ;; We determine if we need to worry about lighting this cell at all
     ;; First three possibilities: no, the cell is in shadow and/or not visible

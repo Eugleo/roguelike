@@ -88,7 +88,6 @@
       [wall-horizontal . "LightSlateGray"]
       [wall-vertical . "LightSlateGray"])))
 
-
 (define (get-bitmap-for-entity entity)
     (cond
       [(is-a? entity player%) (hash-ref entity-bitmaps-hash 'player)]
